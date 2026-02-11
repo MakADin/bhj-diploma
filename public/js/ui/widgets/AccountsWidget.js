@@ -36,7 +36,7 @@ class AccountsWidget {
    * успешном ответе необходимо очистить список ранее
    * отображённых счетов через AccountsWidget.clear().
    * Отображает список полученных счетов с помощью
-   * метода renderItem()
+   * метода renderItems()
    * */
   update() {
 
@@ -77,7 +77,7 @@ class AccountsWidget {
    * AccountsWidget.getAccountHTML HTML-код элемента
    * и добавляет его внутрь элемента виджета
    * */
-  renderItem(data){
+  renderItems(data){
 
   }
 }
