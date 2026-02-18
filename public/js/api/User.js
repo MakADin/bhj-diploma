@@ -10,7 +10,7 @@ class User {
    * локальном хранилище.
    * */
   static setCurrent(user) {
-    localStorage.setItem('user', user);
+    localStorage.setItem('currentUser', JSON.stringify(user));
   }
 
   /**
@@ -18,7 +18,7 @@ class User {
    * пользователе из локального хранилища.
    * */
   static unsetCurrent() {
-    localStorage.removeItem('user');
+    localStorage.removeItem('currentUser');
   }
 
   /**
@@ -26,7 +26,8 @@ class User {
    * из локального хранилища
    * */
   static current() {
-    return localStorage.getItem('user');
+    const storedData = localStorage.getItem('currentUser');
+    return storedData ? JSON.parse(storedData) : null;
   }
 
   /**
@@ -39,11 +40,12 @@ class User {
         url: this.URL + '/current',
         method: 'GET',
         responseType: 'json',
-        data: this.current,
       },
       (err, response) => {
         if (!err && response && response.user) {
           this.setCurrent(response.user);
+        } else {
+          this.unsetCurrent();
         }
         callback(err, response);
       },
@@ -80,17 +82,20 @@ class User {
    * User.setCurrent.
    * */
   static register(data, callback) {
-    createRequest({
-      url: this.URL + '/register',
-      method: 'POST',
-      responseType: 'json',
-      data},
+    createRequest(
+      {
+        url: this.URL + '/register',
+        method: 'POST',
+        responseType: 'json',
+        data,
+      },
       (err, response) => {
         if (response && response.user) {
-          this.setCurrent(response.user)
+          this.setCurrent(response.user);
         }
         callback(err, response);
-      })
+      },
+    );
   }
 
   /**
@@ -98,16 +103,18 @@ class User {
    * выхода необходимо вызвать метод User.unsetCurrent
    * */
   static logout(callback) {
-    createRequest({
-      url: this.URL + '/logout',
-      method: 'POST',
-      responseType: 'json',
-      data},
+    createRequest(
+      {
+        url: this.URL + '/logout',
+        method: 'POST',
+        responseType: 'json',
+      },
       (err, response) => {
         if (response && response.user) {
           this.unsetCurrent();
         }
         callback(err, response);
-      })
+      },
+    );
   }
 }

@@ -43,22 +43,16 @@ class Sidebar {
 
       if (clickedBtn.classList.contains('menu-item_login')) {
         App.getModal('login').open();
-
       } else if (clickedBtn.classList.contains('menu-item_register')) {
         App.getModal('register').open();
-
       } else if (clickedBtn.classList.contains('menu-item_logout')) {
-        /* 
-        User.logout()
-          .then(() => {
-            // После успешного выхода устанавливаем состояние приложения
+        User.logout((err) => {
+          if (err) {
+            console.error('Logout error: ', err.message);
+          } else {
             App.setState('init');
-            console.log('Пользователь успешно вышел из системы');
-          })
-          .catch((err) => {
-            console.error('Ошибка выхода:', err);
-          });
-        */
+          }
+        });
       }
     });
   }
