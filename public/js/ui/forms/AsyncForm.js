@@ -6,6 +6,7 @@
  * для последующей обработки
  * */
 class AsyncForm {
+  static element;
   /**
    * Если переданный элемент не существует,
    * необходимо выкинуть ошибку.
@@ -13,7 +14,11 @@ class AsyncForm {
    * через registerEvents()
    * */
   constructor(element) {
-
+    if (!element) {
+      throw 'элемент формы не найден!';
+    }
+    this.form = element;
+    this.registerEvents();
   }
 
   /**
@@ -21,7 +26,10 @@ class AsyncForm {
    * вызывает метод submit()
    * */
   registerEvents() {
-
+    this.form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      this.submit();
+    });
   }
 
   /**
@@ -32,18 +40,24 @@ class AsyncForm {
    * }
    * */
   getData() {
+    const formData = new FormData(this.form);
+    const data = {};
 
+    formData.forEach((value, key) => {
+      data[key] = value;
+    });
+
+    return data;
   }
 
-  onSubmit(options){
-
-  }
+  onSubmit(options) {}
 
   /**
    * Вызывает метод onSubmit и передаёт туда
    * данные, полученные из метода getData()
    * */
   submit() {
-
+    const data = this.getData();
+    this.onSubmit(data);
   }
 }

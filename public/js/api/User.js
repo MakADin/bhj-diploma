@@ -27,7 +27,7 @@ class User {
    * */
   static current() {
     const storedData = localStorage.getItem('currentUser');
-    return storedData ? JSON.parse(storedData) : null;
+    return storedData ? JSON.parse(storedData) : undefined;
   }
 
   /**

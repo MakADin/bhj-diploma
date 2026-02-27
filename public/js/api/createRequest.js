@@ -11,46 +11,29 @@ const createRequest = (options = {}, callback) => {
   let method = options.method || 'GET';
   let data = options.data || {};
 
-  if (Object.keys(data).length > 0) {
-    if (method === 'GET') {
-      let params = [];
+  if (method === 'GET' && Object.keys(data).length > 0) {
+    let params = [];
 
-      for (const key in data) {
-        params.push(
-          `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`,
-        );
-      }
-
-      if (params.length > 0) {
-        url += '?' + params.join('&');
-      }
-
-      xhr.open(method, url);
-    } else if (method === 'POST') {
-      formData = new FormData();
-      Object.keys(data).forEach((key) => {
-        formData.append(key, data[key]);
-      });
-      xhr.open(method, url);
-    } else {
-      xhr.open(method, url);
+    for (const key in data) {
+      params.push(
+        `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`,
+      );
     }
-  } else {
-    xhr.open(method, url);
-  }
 
-  if (formData) {
-    xhr.send(formData);
-  } else {
-    xhr.send();
+    url += '?' + params.join('&');
+
+  } else if (Object.keys(data).length > 0) {
+    formData = new FormData();
+    Object.keys(data).forEach((key) => {
+      formData.append(key, data[key]);
+    });
   }
+  xhr.open(method, url);
+
+  xhr.send(formData);
 
   xhr.onload = function () {
-    if (xhr.status >= 200 && xhr.status <= 299) {
       callback(null, xhr.response);
-    } else {
-      callback(new Error(`Ошибка запроса: ${xhr.status}`), null);
-    }
   };
 
   xhr.onerror = function () {
