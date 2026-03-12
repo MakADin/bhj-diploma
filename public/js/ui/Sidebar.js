@@ -34,26 +34,27 @@ class Sidebar {
    * выходу устанавливает App.setState( 'init' )
    * */
   static initAuthLinks() {
-    const sidebarMenu = document.querySelector('.sidebar-menu');
+    const loginBtn = document.querySelector('.menu-item_login');
+    const registerBtn = document.querySelector('.menu-item_register');
+    const logoutBtn = document.querySelector('.menu-item_logout');
 
-    sidebarMenu.addEventListener('click', (event) => {
-      let clickedBtn = event.target.closest('.menu-item');
+    loginBtn.addEventListener('click', (event) => {
+      event.preventDefault();
+      App.getModal('login').open();
+    });
 
-      if (!clickedBtn) return;
+    registerBtn.addEventListener('click', (event) => {
+      event.preventDefault();
+      App.getModal('register').open();
+    });
 
-      if (clickedBtn.classList.contains('menu-item_login')) {
-        App.getModal('login').open();
-      } else if (clickedBtn.classList.contains('menu-item_register')) {
-        App.getModal('register').open();
-      } else if (clickedBtn.classList.contains('menu-item_logout')) {
-        User.logout((err) => {
-          if (err) {
-            console.error('Logout error: ', err.message);
-          } else {
-            App.setState('init');
-          }
-        });
-      }
+    logoutBtn.addEventListener('click', (event) => {
+      event.preventDefault();
+      User.logout((err) => {
+        err
+          ? console.error('Logout error: ', err.message)
+          : App.setState('init');
+      });
     });
   }
 }

@@ -17,9 +17,7 @@ class Entity {
         responseType: 'json',
         data: data,
       },
-      (err, response) => {
-        callback(err, response);
-      },
+      callback,
     );
   }
 
@@ -36,9 +34,7 @@ class Entity {
         responseType: 'json',
         data: data,
       },
-      (err, response) => {
-        callback(err, response);
-      },
+      callback,
     );
   }
 
@@ -54,9 +50,7 @@ class Entity {
         responseType: 'json',
         data: data,
       },
-      (err, response) => {
-        callback(err, response);
-      },
+      callback,
     );
   }
 }

@@ -15,7 +15,7 @@ class AsyncForm {
    * */
   constructor(element) {
     if (!element) {
-      throw 'элемент формы не найден!';
+      throw new Error('элемент формы не найден!');
     }
     this.form = element;
     this.registerEvents();
@@ -41,13 +41,7 @@ class AsyncForm {
    * */
   getData() {
     const formData = new FormData(this.form);
-    const data = {};
-
-    formData.forEach((value, key) => {
-      data[key] = value;
-    });
-
-    return data;
+    return Object.fromEntries(formData.entries());
   }
 
   onSubmit(options) {}

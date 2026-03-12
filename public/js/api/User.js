@@ -64,7 +64,7 @@ class User {
         url: this.URL + '/login',
         method: 'POST',
         responseType: 'json',
-        data,
+        data: data,
       },
       (err, response) => {
         if (response && response.user) {

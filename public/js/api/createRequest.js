@@ -21,19 +21,23 @@ const createRequest = (options = {}, callback) => {
     }
 
     url += '?' + params.join('&');
-
+    
   } else if (Object.keys(data).length > 0) {
     formData = new FormData();
     Object.keys(data).forEach((key) => {
       formData.append(key, data[key]);
     });
   }
-  xhr.open(method, url);
+  try {
+    xhr.open(method, url);
 
-  xhr.send(formData);
+    xhr.send(formData);
+  } catch (error) {
+    throw new Error('Error: ', error.message);
+  }
 
   xhr.onload = function () {
-      callback(null, xhr.response);
+    callback(null, xhr.response);
   };
 
   xhr.onerror = function () {

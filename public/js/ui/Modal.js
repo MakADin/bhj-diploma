@@ -14,7 +14,7 @@ class Modal {
    * */
   constructor(element) {
     if (element === null) {
-      throw 'Элемент не существует';
+      throw new Error('Элемент не существует');
     }
 
     this.element = element;

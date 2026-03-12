@@ -5,14 +5,19 @@
  * */
 
 class UserWidget {
+  static element;
   /**
    * Устанавливает полученный элемент
    * в свойство element.
    * Если переданный элемент не существует,
    * необходимо выкинуть ошибку.
    * */
-  constructor(element){
+  constructor(element) {
+    if (!element) {
+      throw new Error('Элемент не существует');
+    }
 
+    this.element = element;
   }
 
   /**
@@ -22,7 +27,10 @@ class UserWidget {
    * в элемент .user-name устанавливает имя
    * авторизованного пользователя
    * */
-  update(){
-
+  update() {
+    const currentUser = User.current();
+    if (currentUser) {
+      document.querySelector('.user-name').textContent = currentUser.name;
+    }
   }
 }
