@@ -5,6 +5,7 @@
  * */
 class TransactionsPage {
   static element;
+  static lastOptions;
   /**
    * Если переданный элемент не существует,
    * необходимо выкинуть ошибку.
@@ -39,7 +40,7 @@ class TransactionsPage {
       '.transaction__remove',
     );
     const accountsPanel = document.querySelector('.accounts-panel');
-    
+
     removeAccountBtn.addEventListener('click', (e) => {
       e.preventDefault();
       this.removeAccount();
@@ -55,8 +56,10 @@ class TransactionsPage {
     }
 
     accountsPanel.addEventListener('click', (e) => {
-      
-    })
+      this.render(e.target.closest('.account'));
+
+      // this.render(e.target.closest('.account').dataset.id);
+    });
   }
 
   /**
@@ -69,14 +72,13 @@ class TransactionsPage {
    * для обновления приложения
    * */
   removeAccount() {
-    const isRemoved = confirm('Вы действительно хотите удалить счет?');
-    if (isRemoved) {
-      Account.remove(this.element, (err, response) => {
+    const isRemovedAccount = confirm('Вы действительно хотите удалить счет?');
+    if (isRemovedAccount) {
+      Account.remove(this.lastOptions, (err, response) => {
         if (err) {
           return console.error(err.message || 'ошибка удаления счета');
         }
         this.clear();
-
       });
     }
   }
@@ -87,7 +89,13 @@ class TransactionsPage {
    * По удалению транзакции вызовите метод App.update(),
    * либо обновляйте текущую страницу (метод update) и виджет со счетами
    * */
-  removeTransaction(id) {}
+  removeTransaction(id) {
+    const isRemovedTransaction = confirm(
+      'Вы действительно хотите удалить транзакцию?',
+    );
+    if (isRemovedTransaction) {
+    }
+  }
 
   /**
    * С помощью Account.get() получает название счёта и отображает
@@ -100,7 +108,26 @@ class TransactionsPage {
       return;
     }
 
+    this.lastOptions = options;
+    const accountID = this.lastOptions.dataset.id;
 
+    Account.get(this.lastOptions, (err, response) => {
+      if (err) {
+        throw new Error(err.message || 'неизвестная ошибка');
+      }
+
+      for (const acc of response.data) {
+        if (accountID === acc.id) {
+          this.renderTitle(acc.name);
+        }
+      }
+    });
+    Transaction.list(this.lastOptions, (err, response) => {
+      if (err) {
+        throw new Error(err.message || 'неизвестная ошибка');
+      }
+
+    });
   }
 
   /**
@@ -110,7 +137,7 @@ class TransactionsPage {
    * */
   clear() {
     this.renderTransactions([]);
-    this.renderTitle('Название счёта')
+    this.renderTitle('Название счёта');
   }
 
   /**
@@ -139,13 +166,44 @@ class TransactionsPage {
    * Формирует HTML-код транзакции (дохода или расхода).
    * item - объект с информацией о транзакции
    * */
-  getTransactionHTML(item) {}
+  getTransactionHTML(item) {
+    return `
+      <div class="transaction transaction_${item.type === 'income' ? 'income' : 'expense'} row">
+        <div class="col-md-7 transaction__details">
+          <div class="transaction__icon">
+              <span class="fa fa-money fa-2x"></span>
+          </div>
+          <div class="transaction__info">
+              <h4 class="transaction__title">${item.name}</h4>
+              <div class="transaction__date">${this.formatDate(item.created_at)}</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="transaction__summ">
+              ${item.sum} <span class="currency">₽</span>
+          </div>
+        </div>
+        <div class="col-md-2 transaction__controls">
+            <button class="btn btn-danger transaction__remove" data-id="${item.id}">
+                <i class="fa fa-trash"></i>  
+            </button>
+        </div>
+      </div>
+    `;
+  }
 
   /**
    * Отрисовывает список транзакций на странице
    * используя getTransactionHTML
    * */
   renderTransactions(data) {
+    const contentSection = this.element.querySelector('.content');
+    let htmlContent = '';
 
+    data.forEach((item) => {
+      htmlContent = this.getTransactionHTML(item);
+    });
+
+    contentSection.innerHTML = htmlContent;
   }
 }
