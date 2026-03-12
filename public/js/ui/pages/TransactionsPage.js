@@ -36,9 +36,6 @@ class TransactionsPage {
    * */
   registerEvents() {
     const removeAccountBtn = this.element.querySelector('.remove-account');
-    const removeTransactionBtns = this.element.querySelectorAll(
-      '.transaction__remove',
-    );
     const accountsPanel = document.querySelector('.accounts-panel');
 
     removeAccountBtn.addEventListener('click', (e) => {
@@ -46,20 +43,25 @@ class TransactionsPage {
       this.removeAccount();
     });
 
-    if (removeTransactionBtns.length > 0) {
-      removeTransactionBtns.forEach((btn) => {
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          this.removeTransaction(btn.dataset.id);
-        });
-      });
-    }
+    this.element.addEventListener('click', (e) => {
+      const targetBtn = e.target.closest('.transaction__remove');
+      if (targetBtn) {
+        e.preventDefault();
+        this.removeTransaction(targetBtn.dataset.id);
+      }
+    });
 
     accountsPanel.addEventListener('click', (e) => {
-      this.render(e.target.closest('.account'));
-
-      // this.render(e.target.closest('.account').dataset.id);
+      const targetAcc = e.target.closest('.account');
+      if (targetAcc) {
+        App.showHeaderContent();
+        this.render(targetAcc);
+      }
     });
+
+    // accountsPanel.addEventListener('click', (e) => {
+    //   this.render(e.target.closest('.account'));
+    // });
   }
 
   /**
@@ -72,14 +74,18 @@ class TransactionsPage {
    * для обновления приложения
    * */
   removeAccount() {
+    if (!this.lastOptions) return;
+
     const isRemovedAccount = confirm('Вы действительно хотите удалить счет?');
     if (isRemovedAccount) {
-      Account.remove(this.lastOptions, (err, response) => {
+      Account.remove({ id: this.lastOptions.dataset.id }, (err, response) => {
         if (err) {
           return console.error(err.message || 'ошибка удаления счета');
         }
-        this.clear();
       });
+      this.clear();
+      App.update();
+      App.hideHeaderContent();
     }
   }
 
@@ -94,6 +100,14 @@ class TransactionsPage {
       'Вы действительно хотите удалить транзакцию?',
     );
     if (isRemovedTransaction) {
+      Transaction.remove({ id }, (err, response) => {
+        if (err) {
+          return console.error(err.message || 'ошибка удаления транзакции');
+        }
+        console.log(response);
+
+        App.update();
+      });
     }
   }
 
@@ -103,7 +117,7 @@ class TransactionsPage {
    * Получает список Transaction.list и полученные данные передаёт
    * в TransactionsPage.renderTransactions()
    * */
-  render(options) {
+  render(options = this.lastOptions) {
     if (!options) {
       return;
     }
@@ -111,22 +125,24 @@ class TransactionsPage {
     this.lastOptions = options;
     const accountID = this.lastOptions.dataset.id;
 
-    Account.get(this.lastOptions, (err, response) => {
+    Account.get(accountID, (err, response) => {
       if (err) {
         throw new Error(err.message || 'неизвестная ошибка');
       }
 
-      for (const acc of response.data) {
-        if (accountID === acc.id) {
-          this.renderTitle(acc.name);
-        }
+      const foundAccount = response.data.find((acc) => acc.id === accountID);
+      if (foundAccount) {
+        this.renderTitle(foundAccount.name);
+      } else {
+        console.warn('Аккаунт не найден');
       }
     });
-    Transaction.list(this.lastOptions, (err, response) => {
+
+    Transaction.list({ account_id: accountID }, (err, response) => {
       if (err) {
         throw new Error(err.message || 'неизвестная ошибка');
       }
-
+      this.renderTransactions(response.data);
     });
   }
 
@@ -138,6 +154,7 @@ class TransactionsPage {
   clear() {
     this.renderTransactions([]);
     this.renderTitle('Название счёта');
+    this.lastOptions = '';
   }
 
   /**
@@ -201,7 +218,7 @@ class TransactionsPage {
     let htmlContent = '';
 
     data.forEach((item) => {
-      htmlContent = this.getTransactionHTML(item);
+      htmlContent += this.getTransactionHTML(item);
     });
 
     contentSection.innerHTML = htmlContent;

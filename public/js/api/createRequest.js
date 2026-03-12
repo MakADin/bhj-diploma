@@ -21,8 +21,8 @@ const createRequest = (options = {}, callback) => {
     }
 
     url += '?' + params.join('&');
-    
   } else if (Object.keys(data).length > 0) {
+    
     formData = new FormData();
     Object.keys(data).forEach((key) => {
       formData.append(key, data[key]);
