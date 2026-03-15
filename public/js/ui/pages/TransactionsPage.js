@@ -35,33 +35,21 @@ class TransactionsPage {
    * TransactionsPage.removeAccount соответственно
    * */
   registerEvents() {
-    const removeAccountBtn = this.element.querySelector('.remove-account');
-    const accountsPanel = document.querySelector('.accounts-panel');
+    this.element.addEventListener('click', (event) => {
+      event.preventDefault();
 
-    removeAccountBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      this.removeAccount();
-    });
+      const targetButton = event.target.closest(
+        '.remove-account, .transaction__remove',
+      );
 
-    this.element.addEventListener('click', (e) => {
-      const targetBtn = e.target.closest('.transaction__remove');
-      if (targetBtn) {
-        e.preventDefault();
-        this.removeTransaction(targetBtn.dataset.id);
+      if (targetButton) {
+        if (targetButton.classList.contains('remove-account')) {
+          this.removeAccount();
+        } else if (targetButton.classList.contains('transaction__remove')) {
+          this.removeTransaction(targetButton.dataset.id);
+        }
       }
     });
-
-    accountsPanel.addEventListener('click', (e) => {
-      const targetAcc = e.target.closest('.account');
-      if (targetAcc) {
-        App.showHeaderContent();
-        this.render(targetAcc);
-      }
-    });
-
-    // accountsPanel.addEventListener('click', (e) => {
-    //   this.render(e.target.closest('.account'));
-    // });
   }
 
   /**
@@ -78,7 +66,7 @@ class TransactionsPage {
 
     const isRemovedAccount = confirm('Вы действительно хотите удалить счет?');
     if (isRemovedAccount) {
-      Account.remove({ id: this.lastOptions.dataset.id }, (err, response) => {
+      Account.remove({ id: this.lastOptions.account_id }, (err, response) => {
         if (err) {
           return console.error(err.message || 'ошибка удаления счета');
         }
@@ -104,7 +92,6 @@ class TransactionsPage {
         if (err) {
           return console.error(err.message || 'ошибка удаления транзакции');
         }
-        console.log(response);
 
         App.update();
       });
@@ -123,22 +110,16 @@ class TransactionsPage {
     }
 
     this.lastOptions = options;
-    const accountID = this.lastOptions.dataset.id;
+    const accountID = this.lastOptions.account_id;
 
     Account.get(accountID, (err, response) => {
       if (err) {
-        throw new Error(err.message || 'неизвестная ошибка');
+        throw new Error(err.message || 'Счет не найден.');
       }
-
-      const foundAccount = response.data.find((acc) => acc.id === accountID);
-      if (foundAccount) {
-        this.renderTitle(foundAccount.name);
-      } else {
-        console.warn('Аккаунт не найден');
-      }
+      this.renderTitle(response.data.name);
     });
 
-    Transaction.list({ account_id: accountID }, (err, response) => {
+    Transaction.list(this.lastOptions, (err, response) => {
       if (err) {
         throw new Error(err.message || 'неизвестная ошибка');
       }
@@ -169,14 +150,14 @@ class TransactionsPage {
    * в формат «10 марта 2019 г. в 03:20»
    * */
   formatDate(date) {
-    const dateObj = new Date(date);
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    const formattedDate = dateObj.toLocaleDateString('ru-RU', options);
-    const time = dateObj.toLocaleTimeString('ru-RU', {
+    const formattedDate = new Date(date);
+    return formattedDate.toLocaleString('ru-RU', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
     });
-    return `${formattedDate}, ${time}`;
   }
 
   /**

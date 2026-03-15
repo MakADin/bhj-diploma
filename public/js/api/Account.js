@@ -13,7 +13,7 @@ class Account extends Entity {
       {
         id: id,
         method: 'GET',
-        url: Account.URL,
+        url: `${Account.URL}/${id}`,
       },
       callback,
     );

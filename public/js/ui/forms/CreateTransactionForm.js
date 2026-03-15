@@ -21,17 +21,18 @@ class CreateTransactionForm extends AsyncForm {
 
     Account.list(User.current(), (err, response) => {
       if (err) return console.error(err.message || 'Ошибка загрузки счетов.');
-      
-      selects.forEach((selectEl) => {
-        selectEl.innerHTML = '';
+      if (response.success) {
+        selects.forEach((selectEl) => {
+          selectEl.innerHTML = '';
 
-        response.data.forEach((acc) => {
-          let option = document.createElement('option');
-          option.value = acc.id;
-          option.textContent = acc.name;
-          selectEl.append(option);
+          response.data.forEach((acc) => {
+            let option = document.createElement('option');
+            option.value = acc.id;
+            option.textContent = acc.name;
+            selectEl.append(option);
+          });
         });
-      });
+      }
     });
   }
 

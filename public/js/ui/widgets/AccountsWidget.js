@@ -32,16 +32,21 @@ class AccountsWidget {
    * вызывает AccountsWidget.onSelectAccount()
    * */
   registerEvents() {
-    document.querySelector('.create-account').addEventListener('click', (e) => {
-      e.preventDefault();
-      App.getModal('createAccount').open();
+    const accountsPanel = document.querySelector('.accounts-panel');
+    const createAccountBtn = document.querySelector('.create-account');
+
+    accountsPanel.addEventListener('click', (e) => {
+      const targetAcc = e.target.closest('.account');
+      if (!targetAcc) {
+        return;
+      } else {
+        this.onSelectAccount(targetAcc);
+      }
     });
 
-    this.element.querySelectorAll('.account').forEach((accountItem) => {
-      accountItem.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.onSelectAccount(accountItem);
-      });
+    createAccountBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      App.getModal('createAccount').open();
     });
   }
 
@@ -61,7 +66,6 @@ class AccountsWidget {
         if (err) {
           throw new Error('Ошибка получения счетов:', err);
         }
-
         this.clear();
         this.renderItems(accounts);
       });
@@ -97,6 +101,7 @@ class AccountsWidget {
     const id = element.dataset.id;
 
     App.showPage('transactions', { account_id: id });
+    App.showHeaderContent();
   }
 
   /**
@@ -122,16 +127,16 @@ class AccountsWidget {
    * и добавляет его внутрь элемента виджета
    * */
   renderItems(data) {
-    const accountsPanel = document.querySelector('.accounts-panel');    
+    if (data.success) {
+      const accountsPanel = document.querySelector('.accounts-panel');
 
-    const accounts = data.data;    
-    if (!accounts.length) {
-      return;
+      const accounts = data.data;
+      if (accounts.length > 0) {
+        accounts.forEach((acc) => {
+          const html = this.getAccountHTML(acc);
+          accountsPanel.insertAdjacentHTML('beforeend', html);
+        });
+      }
     }
-
-    accounts.forEach((acc) => {
-      const html = this.getAccountHTML(acc);
-      accountsPanel.insertAdjacentHTML('beforeend', html);
-    });
   }
 }

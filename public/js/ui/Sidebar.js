@@ -50,11 +50,14 @@ class Sidebar {
 
     logoutBtn.addEventListener('click', (event) => {
       event.preventDefault();
-      User.logout((err) => {
-        err
-          ? console.error('Logout error: ', err.message)
-          : App.setState('init');
-      });
+      User.logout(err => {
+        if (err) {
+          console.error('Logout error: ', err.message);          
+        } else {
+          App.setState('init');
+          App.hideHeaderContent();
+        }
+      })
     });
   }
 }
